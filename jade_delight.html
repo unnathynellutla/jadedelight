@@ -33,14 +33,14 @@ function MenuItem(name, cost)
 	this.name = name;
 	this.cost=cost;
 };
-
+//function to fill cost fields
 function TotalCosts() {
 	
 	sub = 0;
 	tax = 0;
 	total = 0;
 	temp = 0;
-	
+	//for each menu item, multiply the ordered quantity by the cost 
 	num_items = document.getElementsByName("cost");
 	
 	for (i = 0; i < num_items.length; i++) {
@@ -48,7 +48,7 @@ function TotalCosts() {
 		num_items[i].value = temp.toFixed(2);
 		sub = sub + temp; 
 	}
-	
+	//fill subtotal, tax, total
 	document.getElementById("subtotal").value = sub.toFixed(2);
 	
 	tax = sub * 0.0625;
@@ -56,22 +56,23 @@ function TotalCosts() {
 		
 	total = sub + tax;
 	document.getElementById("total").value = total.toFixed(2);
-	
-	
+	//return total to use later
+	return total;
 };
 
-	
-function Validate(p_d)
+//function to validate fields when form is submitted	
+function Validate(p_d, total)
 {
 	var str = "";
 	var validate = true;
 	var order= true;
 
-	
+	//validate that the user entered their last name
 	if($('[name = fname]').val().length === 0 ){
-		str += "Please enter your email..";
+		str += "Please enter last name.\n";
 		validate = false;
 	}
+	//validate that phone number is 10 digits
 	var phone_num = String($('[name = phone]').val());
 	
 	phone_num = phone_num.replace(/-/g, "",3);
@@ -79,50 +80,62 @@ function Validate(p_d)
 	phone_num = phone_num.replace(/\)/g, "",2);
 	
 	if( phone_num.length != 10 ){
-		str += "\nPlease enter your phone number.";
+		str += "Please enter your phone number.\n";
 		validate = false;
 	}  
+	//Find how long it will take until order is completed
 	var time = "";
 	if(p_d === true){
-		time = "\nPickup in 15 mins.";
+		time = "Pickup in 15 mins.\n";
 		
 	}
 	if(p_d === false){
-		time = "\nDelivery in 30 mins.";
-		
+		time = "Delivery in 30 mins.\n";
+		//If food is for delivery, validate street and city
 		if($('[name = street]').val().length === 0){
-			str += "\nPlease enter your street for delivery.";
+			str += "Please enter your street for delivery.\n";
 			validate = false;
 		}
 		if($('[name = city]').val().length === 0){
 			
-			str += "\nPlease enter your street for city.";
+			str += "Please enter your street for city.\n";
 			validate = false;
 		}
 	}
-	
+	//check to see if there are any menu items ordered
 	var items = "";
 	for (i=0; i < menuItems.length; i++) {
 		quant = document.getElementsByName("quan"+i)[0].value;
 		if(quant != 0){
-			items += "\n" + String(quant) + " " + menuItems[i].name + ".";
+			items +=  String(quant) + " " + menuItems[i].name + "." + "\n";
 			order = false;
 		}
 	}
 	if(order === true ){
-	   str += "\nAt least one item must be ordered.";
+	   str += "At least one item must be ordered.\n";
 		validate = false;
 	} 
+	//if none of the fields were invalid, open order in a new tab
 	if(validate === true){
-		str += "\nThanks for your order!";
+		str += "Thanks for your order!\n";
 		str += time;
 		str += items;
+		str += "Your Order Total " + total;
 		var new_window = window.open();
-		new_window.document.write("<p>" + str+ "</p>");
-	} else if (validate === false){
+		new_window.document.write("<p>" + str + "</p>");
+	} 
+	//else create an alert of all validation warnings
+	else if (validate === false){
 		window.alert(str);
 	}
 };
+//function to hide fields when order is pickup
+function Pickup(){
+	$("[name = street]").hide();
+    $("[name = city]").hide();
+    $("p:nth-of-type(3)").hide();
+	$("p:nth-of-type(4)").hide();
+}
 	
 </script>
 
@@ -177,21 +190,20 @@ function Validate(p_d)
 <script language = "javascript">
 var validate = false;	
 var quantity;
+var total;
+//call function to total costs when menu items are is selected
 for (i=0; i < menuItems.length; i++) {
 	quantity = document.getElementsByName("quan"+i)[0];
 	quantity.onchange = function(){
-		TotalCosts()
+		total = TotalCosts();
 	};
 }
-	
-if( $('[name = p_or_d]:first:checked').val() == "pickup"){	
+//pickup is checked when you open jade delight, so the name and city must be hidden	
+if( $('[name = p_or_d]:first:checked').val() === "pickup"){	
 	validate = true;
-	$("[name = street]").hide();
-    $("[name = city]").hide();
-    $("p:nth-of-type(3)").hide();
-	$("p:nth-of-type(4)").hide();
+	Pickup();
 }; 
-	
+//show if click delivery	
 $('[name = p_or_d]').click(function() {
 	validate = false;
 	$("[name = street]").show();
@@ -199,16 +211,13 @@ $('[name = p_or_d]').click(function() {
 	$("p:nth-of-type(3)").show();
 	$("p:nth-of-type(4)").show();
 }); 
-
+//hide again if click Pickup
 $('[name= p_or_d]:first').click(function() {
 	validate = true;
-	$("[name = street]").hide();
-    $("[name = city]").hide();
-    $("p:nth-of-type(3)").hide();
-	$("p:nth-of-type(4)").hide();
+	Pickup();
 }); 
 	
-$('input[type = button]').click(function() {Validate(validate)});
+$('input[type = button]').click(function() {Validate(validate, total)});
 </script>
 </body>
 </html>
