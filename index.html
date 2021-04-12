@@ -44,7 +44,7 @@ function TotalCosts() {
 	num_items = document.getElementsByName("cost");
 	
 	for (i = 0; i < num_items.length; i++) {
-		temp = (parseInt(document.getElementsByName("quan"+i)[0].value)) * parseInt(menuItems[i].cost);
+		temp = (parseInt(document.getElementsByName("quan"+i)[0].value)) * menuItems[i].cost;
 		num_items[i].value = temp.toFixed(2);
 		sub = sub + temp; 
 	}
